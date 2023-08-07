@@ -7,7 +7,7 @@ services:
       target: stage
     entrypoint: ./entrypoint.sh
     restart: unless-stopped
-    command: uvicorn src.main:app --proxy-headers --host 0.0.0.0 --port 8000
+    command: uvicorn src.main:app --proxy-headers --host 0.0.0.0 --port 80
     ulimits:
       core: 0
     labels:
