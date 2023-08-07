@@ -1,0 +1,31 @@
+#!/bin/sh
+set -e
+
+echo "Building stage"
+echo " "
+
+env -i \
+CI_ENVIRONMENT_DOMAIN=$CI_ENVIRONMENT_DOMAIN \
+CI_PROJECT_NAME=$CI_PROJECT_NAME \
+CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH \
+bash -c '
+  set -a;
+  source .env.dist;
+
+  export COMPOSE_FILE=docker-compose.yaml:docker-compose.stage.yaml
+  export COMPOSE_PROJECT_NAME=$COMPOSE_PROJECT_NAME-$CI_COMMIT_BRANCH
+  export DOCKER_USER="1000:1000"
+
+  (printenv | grep -v "^_=" | sort)
+' > .env
+
+cat .env
+
+echo " "
+
+mkdir -p /var/www/storage/$CI_PROJECT_NAME-$CI_COMMIT_BRANCH/database
+
+docker-compose up -d --build --force-recreate --remove-orphans
+
+echo " "
+echo "App url: https://$CI_ENVIRONMENT_DOMAIN"

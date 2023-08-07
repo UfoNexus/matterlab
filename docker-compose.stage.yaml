@@ -1,56 +1,19 @@
-version: '3.4'
+version: '3.8'
 
 services:
-  web:
+  app:
+    build:
+      context: .
+      target: stage
+    entrypoint: ./entrypoint.sh
     restart: unless-stopped
-    volumes:
-      - /var/www/storage/${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}/media:/media
-      - ./app/docker/backend/nginx.conf:/etc/nginx/nginx.conf:ro
+    command: uvicorn src.main:app --proxy-headers --host 0.0.0.0 --port 8000
+    ulimits:
+      core: 0
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}.rule=Host(`${CI_ENVIRONMENT_DOMAIN}`)"
       - "traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}.tls.certresolver=default"
-
-  django:
-    build:
-      target: stage
-    entrypoint: ./entrypoint.sh
-    restart: unless-stopped
-    command: gunicorn --env DJANGO_SETTINGS_MODULE=project.settings.stage project.asgi:application -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
-    volumes:
-      - /var/www/storage/${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}/media:/app/media
-      - ./django/static:/app/static
-    ulimits:
-      core: 0
-  # Параметр ulimit.core=0 необходим для того, чтобы при различных сбоях не создавались файлы core в директории сервиса,
-  # которые препятствуют нормальному запуску контейнера и их сложно удалить (owner=root, umask=600)
-
-  redis:
-    restart: unless-stopped
-    volumes:
-      - /var/www/storage/${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}/redis:/data
-
-  celery:
-    build:
-      target: stage
-    restart: unless-stopped
-    command: celery -A project worker -l info -c 2
-
-  celery-beat:
-    build:
-      target: stage
-    restart: unless-stopped
-    command: celery -A project beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-
-  celery-flower:
-    build:
-      target: stage
-    restart: unless-stopped
-    command: celery -A project flower -l info
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}-flower.rule=Host(`flower-${CI_ENVIRONMENT_DOMAIN}`)"
-      - "traefik.http.services.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}-flower.loadbalancer.server.port=5555"
 
   db:
     restart: unless-stopped
@@ -60,12 +23,3 @@ services:
       - "POSTGRES_DB=${DB_NAME}"
       - "POSTGRES_USER=${DB_USER}"
       - "POSTGRES_PASSWORD=${DB_PASSWORD}"
-
-  mailhog:
-    image: mailhog/mailhog
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-mailhog.rule=Host(`mail-${CI_ENVIRONMENT_DOMAIN}`)"
-      - "traefik.http.services.${COMPOSE_PROJECT_NAME}-mailhog.loadbalancer.server.port=8025"
-      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-mailhog.tls.certresolver=default"
