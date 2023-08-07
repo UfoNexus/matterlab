@@ -17,7 +17,7 @@ class MattermostAPI:
     def _get_url(self, endpoint: str):
         return f'{str(self.base_url)}{endpoint}'
 
-    def create_post(self, channel_id: str, content: str):
+    async def create_post(self, channel_id: str, content: str):
         data = {
             'channel_id': 'y3d9btrtfjbdzncfepa31jumtr',
             'message': content

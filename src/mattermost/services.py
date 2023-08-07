@@ -9,7 +9,7 @@ color_status_match = {
 }
 
 
-def prepare_message(data: WebHook) -> str:
+async def prepare_message(data: WebHook) -> str:
     md_file = MdUtils(file_name='mattermost_message')
 
     # Значок со статусом pipeline
