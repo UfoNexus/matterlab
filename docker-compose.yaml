@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      target: base
+    working_dir: /app
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+
+  db:
+    image: postgres:15

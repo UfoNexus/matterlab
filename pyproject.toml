@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "matterlab"
+version = "0.1.0"
+description = "Mattermost bot for gitlab webhooks"
+authors = ["Creonit"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.100"
+uvicorn = {version = "^0.23", extras = ["standard"]}
+sqlalchemy = "^2.0"
+alembic = "^1.11"
+pydantic-settings = "^2.0"
+email-validator = "^2.0"
+fastapi-debug-toolbar = "^0.5"
+mdutils = "^1.6"
+psycopg2 = "^2.9"
+asyncpg = "^0.28"
+
+[build-system]
+requires = ["poetry-core>=1.6"]
+build-backend = "poetry.core.masonry.api"
