@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, EmailStr, Field, HttpUrl, field_validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 
 class Source(StrEnum):
@@ -58,7 +58,13 @@ class GitlabUser(BaseModel):
     name: str = Field(title='Имя')
     username: str
     avatar_url: HttpUrl = Field(title='Аватарка')
-    email: EmailStr
+    email: str | None
+
+    @field_validator('email')
+    def parse_email(cls, value, info):
+        if value == '[REDACTED]':
+            value = None
+        return value
 
 
 class WebHook(BaseModel):
