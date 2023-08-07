@@ -1,19 +1,27 @@
 version: '3.4'
 
 services:
+  web:
+    image: nginx:1.25
+    depends_on:
+      - app
+    restart: unless-stopped
+    volumes:
+      - ./app/docker/backend/nginx.conf:/etc/nginx/nginx.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}.rule=Host(`${CI_ENVIRONMENT_DOMAIN}`)"
+      - "traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}.tls.certresolver=default"
+
   app:
     build:
       context: .
       target: stage
     entrypoint: ./entrypoint.sh
     restart: unless-stopped
-    command: uvicorn src.main:app --proxy-headers --host 0.0.0.0 --port 80
+    command: uvicorn src.main:app --proxy-headers --host 0.0.0.0 --port 8000
     ulimits:
       core: 0
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}.rule=Host(`${CI_ENVIRONMENT_DOMAIN}`)"
-      - "traefik.http.routers.${CI_PROJECT_NAME}-${CI_COMMIT_BRANCH}.tls.certresolver=default"
 
   db:
     restart: unless-stopped
