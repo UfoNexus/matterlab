@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     debug: bool = False
+    local: bool = False
 
     db_host: str
     db_port: int = 5432
