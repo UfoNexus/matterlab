@@ -15,8 +15,6 @@ app.add_middleware(
     DebugToolbarMiddleware,
     panels=['debug_toolbar.panels.sqlalchemy.SQLAlchemyPanel']
 )
-if not settings.local:
-    app.add_middleware(HTTPSRedirectMiddleware)
 
 # Роутеры
 app.include_router(gitlab_router)
