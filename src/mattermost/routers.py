@@ -159,7 +159,6 @@ async def connect_gitlab_refresh(
 async def connect_gitlab_complete(
         data: Annotated[CommandRequest, Body()],
         request: Request,
-        # headers: Annotated[dict, Header()],
         db_session: AsyncSession = Depends(get_db_session)
 ):
     from src.main import app
