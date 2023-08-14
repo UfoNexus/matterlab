@@ -25,7 +25,7 @@ async def get_or_create_gl_user_by_mm_user(session: Session, mm_user: MMUser, da
     if gl_user:
         gl_user: GitlabUser
         return gl_user
-    gl_user = GitlabUser(**data, mattermost_user=mm_user)
+    gl_user = GitlabUser(access_token=data['access_token'], mattermost_user=mm_user)
     session.add(gl_user)
     await session.commit()  # noqa
     await session.refresh(gl_user)  # noqa
