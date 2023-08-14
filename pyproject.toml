@@ -16,6 +16,7 @@ fastapi-debug-toolbar = "^0.5"
 mdutils = "^1.6"
 psycopg2 = "^2.9"
 asyncpg = "^0.28"
+httpx = "^0.24.1"
 
 [build-system]
 requires = ["poetry-core>=1.6"]

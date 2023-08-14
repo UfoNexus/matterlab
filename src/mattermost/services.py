@@ -1,5 +1,9 @@
+import os
+
+from fastapi import Request
 from mdutils import MdUtils
 
+from src.config import settings
 from src.gitlab.schemas import Status, WebHook
 
 color_status_match = {
@@ -62,3 +66,9 @@ async def prepare_message(data: WebHook) -> str:
     md_file.new_line(f'> *{md_file.new_inline_link(str(data.project.web_url), data.project.name)}*')
     md_file.file_data_text = md_file.file_data_text.strip(' \n')
     return md_file.file_data_text
+
+
+def get_root_url():
+    if host := os.getenv('CI_ENVIRONMENT_DOMAIN'):
+        return f'https://{host}/mattermost'
+    return settings.mattermost_app_root_url or 'http://localhost'

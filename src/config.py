@@ -1,4 +1,4 @@
-from pydantic import HttpUrl
+from pydantic import Field, HttpUrl
 from pydantic_settings import BaseSettings
 
 
@@ -15,6 +15,7 @@ class Settings(BaseSettings):
 
     mattermost_host: HttpUrl
     mattermost_bot_auth_token: str
+    mattermost_app_root_url: str | None = Field(default=None)
 
     @property
     def db_url(self) -> str:

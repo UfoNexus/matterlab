@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 
 class Source(StrEnum):
@@ -32,9 +32,13 @@ class ObjectAttrs(BaseModel):
 
 class ProjectAttrs(BaseModel):
     """Аттрибуты проекта/репозитория"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: int = Field(title='ID')
     name: str = Field(title='Название репы')
     web_url: HttpUrl = Field(title='Ссылка')
+    path_with_namespace: str | None = Field(default=None, title='Обозначение репы')
+    avatar_url: HttpUrl | None = Field(default=None, title='Аватар')
 
 
 class CommitAttrs(BaseModel):

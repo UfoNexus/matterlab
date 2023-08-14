@@ -9,8 +9,8 @@ from .services import parse_webhook
 router = APIRouter(prefix='/gitlab', tags=['GitLab'])
 
 
-@router.post("/webhook", summary='Обработка вебхуков с GitLab')
-async def webhook(
+@router.post('/webhook', summary='Обработка вебхуков с GitLab')
+async def gitlab_webhook(
         x_gitlab_token: Annotated[str, Header()],
         data: Annotated[WebHook, Body()],
         bg_tasks: BackgroundTasks

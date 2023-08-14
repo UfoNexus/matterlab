@@ -2,8 +2,10 @@ import os
 
 from debug_toolbar.middleware import DebugToolbarMiddleware
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from src.gitlab.routers import router as gitlab_router
+from src.mattermost.routers import router as mattermost_router
 
 from .config import settings
 
@@ -14,6 +16,7 @@ app = FastAPI(
     docs_url='/openapi'
 )
 app.openapi_version = '3.0.3'
+app.mount('/static', StaticFiles(directory='static'), name='static')
 
 if settings.local:
     app.add_middleware(
@@ -23,3 +26,4 @@ if settings.local:
 
 # Роутеры
 app.include_router(gitlab_router)
+app.include_router(mattermost_router)

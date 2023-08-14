@@ -1,0 +1,2 @@
+class GitlabException(BaseException):
+    pass

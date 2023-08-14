@@ -7,14 +7,27 @@ from sqlalchemy.orm import mapped_column, relationship
 from src.database import Model
 
 if TYPE_CHECKING:
-    from src.gitlab.models import Project
+    from src.gitlab.models import GitlabUser, Project
+
+
+class User(Model):
+    __tablename__ = 'mattermost_user'
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    username: Mapped[str | None] = mapped_column(nullable=True)
+    email: Mapped[str | None] = mapped_column(nullable=True)
+
+    gitlab_user_id: Mapped[int | None] = mapped_column(ForeignKey('gitlab_user.id'))
+    gitlab_user: Mapped['GitlabUser'] = relationship(back_populates='mattermost_user')
 
 
 class Channel(Model):
     __tablename__ = 'mattermost_channel'
 
-    id: Mapped[str] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    iid: Mapped[str]
     name: Mapped[str]
+    display_name: Mapped[str | None] = mapped_column(nullable=True)
 
     gitlab_projects: Mapped[list['Project']] = relationship(
         back_populates='mattermost_channels', secondary='gitlab_project_mattermost_channel'
