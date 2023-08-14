@@ -43,7 +43,11 @@ async def get_or_create_channel(
 async def attach_gl_project_to_channel(
         session: Session, channel: models.Channel, gl_projects: list['gl_models.Project']
 ) -> models.Channel:
-    await channel.gitlab_projects.extend(gl_projects)
+    result = await session.scalars(select(models.Channel).where(models.Channel.id == channel.id).options(
+        selectinload(models.Channel.gitlab_projects)
+    ))
+    channel = result.first()
+    channel.gitlab_projects.extend(gl_projects)
     session.add(channel)
     await session.commit()  # noqa
     await session.refresh(channel)  # noqa
