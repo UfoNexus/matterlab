@@ -102,3 +102,10 @@ class WebHook(BaseModel):
         if len(allowed_fail) == 0:
             return
         return allowed_fail[0]
+
+
+class HookData(BaseModel):
+    """Хук, подключенный на проекте"""
+    url: HttpUrl
+    project_id: int
+    pipeline_events: bool

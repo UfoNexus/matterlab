@@ -17,6 +17,7 @@ class GitlabAPI:
         list_projects = '/projects'
         get_project = '/projects/{id}'
         create_webhook = '/projects/{id}/hooks'
+        list_webhooks = create_webhook
         get_current_user = '/user'
 
     def _get_url(self, endpoint: str) -> str:
@@ -83,3 +84,13 @@ class GitlabAPI:
             response = await session.post(url, headers=self.headers, json=data)
         if response.status_code >= 400:
             raise GitlabException(response.json())
+
+    async def get_webhooks(self, project_id: int) -> list[schemas.HookData]:
+        url = self._get_url(self.Endpoints.list_webhooks)
+        url = url.replace('{id}', str(project_id))
+        async with httpx.AsyncClient() as session:
+            response = await session.get(url, headers=self.headers)
+        if response.status_code >= 400:
+            raise GitlabException(response.json())
+        response = response.json()
+        return [schemas.HookData(**item) for item in response]

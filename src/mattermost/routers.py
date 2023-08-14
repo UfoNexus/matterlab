@@ -176,7 +176,10 @@ async def connect_gitlab_complete(
     base_url = str(request.base_url).strip('/')
     base_url = base_url.replace('http', request.headers.get('X-Forwarded-Proto', 'http'))
     webhook_url = base_url + app.url_path_for('gitlab_webhook')
-    await instance.create_webhook(project.id, webhook_url)
+    hooks = await instance.get_webhooks(project.id)
+    urls = [item.url for item in hooks]
+    if webhook_url not in urls:
+        await instance.create_webhook(project.id, webhook_url)
     return {'type': 'ok', 'text': f'Этот канал теперь будет получать хуки с проекта {project.path_with_namespace}'}
 
 
