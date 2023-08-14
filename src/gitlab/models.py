@@ -15,11 +15,10 @@ class Project(Model):
     avatar_url: Mapped[str | None] = mapped_column(nullable=True)
 
     mattermost_channels: Mapped[list['Channel']] = relationship(
-        back_populates='gitlab_projects', secondary='gitlab_project_mattermost_channel',
-        sa_relationship_kwargs={'lazy': 'selectin'}
+        back_populates='gitlab_projects', secondary='gitlab_project_mattermost_channel'
     )
     mattermost_channel_associations: Mapped[list['GitlabProjectChannel']] = relationship(
-        back_populates='gitlab_project', sa_relationship_kwargs={'lazy': 'selectin'}
+        back_populates='gitlab_project'
     )
 
 
