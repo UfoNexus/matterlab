@@ -18,6 +18,15 @@ async def get_or_create_project(session: Session, project_data: schemas.ProjectA
     return project
 
 
+async def get_project_by_id(session: Session, project_id: int) -> models.Project:
+    result = await session.scalars(select(models.Project).where(models.Project.id == project_id).options(
+        selectinload(models.Project.mattermost_channels)))
+    project = result.first()
+    if not project:
+        raise ValueError('Проект не найден')
+    return project
+
+
 async def get_or_create_gl_user_by_mm_user(session: Session, mm_user: mm_models.User, data: dict) -> models.GitlabUser:
     gl_user = mm_user.gitlab_user
     if gl_user:

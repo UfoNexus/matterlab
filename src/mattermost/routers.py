@@ -1,4 +1,3 @@
-import json
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Body, Depends, Request
@@ -117,7 +116,7 @@ def generate_connect_gitlab_form(user: User) -> dict:
                     type=FormFieldType.dynamic_select,
                     is_required=True,
                     description='Выбор репозитория',
-                    label='repo',
+                    label='Репозиторий',
                     position=2,
                     lookup=Call(
                         path='/get_repos',
@@ -190,7 +189,7 @@ async def connect_gitlab_complete(
     project_schema = await instance.get_project_detail(data.values['repo']['value'])
     project = await gl_crud.get_or_create_project(db_session, project_schema)
     channel = await crud.get_or_create_channel(db_session, data.context.channel)
-    await crud.attach_gl_project_to_channel(db_session, channel, [project])
+    await crud.add_gl_project_to_channel(db_session, channel, [project])
     base_url = str(request.base_url).strip('/')
     base_url = base_url.replace('http', request.headers.get('X-Forwarded-Proto', 'http'))
     webhook_url = base_url + app.url_path_for('gitlab_webhook')
@@ -201,9 +200,53 @@ async def connect_gitlab_complete(
     return {'type': 'ok', 'text': f'Этот канал теперь будет получать хуки с проекта {project.path_with_namespace}'}
 
 
-# @router.post('/disconnect_gitlab')
-# async def disconnect_gitlab(
-#
+@router.post('/disconnect_gitlab', response_model_by_alias=True, response_model_exclude_none=True)
+async def disconnect_gitlab(
+        data: Annotated[CommandRequest, Body()],
+        bg_tasks: BackgroundTasks
+):
+    bg_tasks.add_task(update_bot_access_token, data.context)
+    return {
+        'type': 'form',
+        'form': Form(
+            title='Открепить репозиторий от канала',
+            submit=Call(
+                path='/disconnect_gitlab_complete',
+                expand=Expand(
+                    channel=ExpandLevel.summary
+                )
+            ),
+            fields=[
+                FormField(
+                    name='repo',
+                    type=FormFieldType.dynamic_select,
+                    is_required=True,
+                    description='Выбор репозитория',
+                    label='Репозиторий',
+                    position=1,
+                    lookup=Call(
+                        path='/get_channel_repos',
+                        expand=Expand(
+                            channel=ExpandLevel.summary
+                        )
+                    )
+                )
+            ]
+        )
+    }
+
+
+@router.post('/disconnect_gitlab_complete')
+async def disconnect_gitlab_complete(
+        data: Annotated[CommandRequest, Body()],
+        bg_tasks: BackgroundTasks,
+        db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
+):
+    bg_tasks.add_task(update_bot_access_token, data.context)
+    channel = await crud.get_or_create_channel(db_session, data.context.channel)
+    project = await gl_crud.get_project_by_id(db_session, int(data.values['repo']['value']))
+    await crud.delete_gl_project_from_channel(db_session, channel, project)
+    return {'type': 'ok', 'text': f'Этот канал больше не будет получать хуки с проекта {data.values["repo"]["label"]}'}
 
 
 @router.post('/get_repos', response_model_exclude_none=True, response_model_by_alias=True)
@@ -223,5 +266,19 @@ async def get_repos(
         DynamicFieldChoice(
             label=project.path_with_namespace, value=str(project.id_), icon_data=str(project.avatar_url)
         ) for project in projects
+    ]
+    return {'type': 'ok', 'data': {'items': choices}}
+
+
+@router.post('/get_channel_repos', response_model_by_alias=True, response_model_exclude_none=True)
+async def get_channel_repos(
+        data: Annotated[CommandRequest, Body()],
+        db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
+):
+    channel = await crud.get_or_create_channel(db_session, data.context.channel)
+    choices = [
+        DynamicFieldChoice(
+            label=repo.path_with_namespace, value=str(repo.id), icon_data=str(repo.avatar_url)
+        ) for repo in channel.gitlab_projects
     ]
     return {'type': 'ok', 'data': {'items': choices}}

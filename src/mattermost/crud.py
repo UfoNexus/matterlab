@@ -40,7 +40,7 @@ async def get_or_create_channel(
     return channel_obj
 
 
-async def attach_gl_project_to_channel(
+async def add_gl_project_to_channel(
         session: Session, channel: models.Channel, gl_projects: list['gl_models.Project']
 ) -> models.Channel:
     result = await session.scalars(select(models.Channel).where(models.Channel.id == channel.id).options(
@@ -48,6 +48,16 @@ async def attach_gl_project_to_channel(
     ))
     channel = result.first()
     channel.gitlab_projects.extend(gl_projects)
+    session.add(channel)
+    await session.commit()  # noqa
+    await session.refresh(channel)  # noqa
+    return channel
+
+
+async def delete_gl_project_from_channel(
+        session: Session, channel: models.Channel, gl_project: 'gl_models.Project'
+) -> models.Channel:
+    channel.gitlab_projects.remove(gl_project)
     session.add(channel)
     await session.commit()  # noqa
     await session.refresh(channel)  # noqa
@@ -78,9 +88,9 @@ async def get_or_create_bot(session: Session, bot: 'schemas.CommandRequestContex
 
 
 async def update_bot(session: Session, bot: models.Bot, data: 'schemas.CommandRequestContext') -> models.Bot:
-    for key, value in data.model_dump(mode='json', include={'bot_user_id', 'bot_access_token'}, by_alias=True):
+    for key, value in data.model_dump(mode='json', include={'bot_user_id', 'bot_access_token'}, by_alias=True).items():
         setattr(bot, key, value)
     session.add(bot)
     await session.commit()  # noqa
-    await session.refresh(bot_obj)  # noqa
+    await session.refresh(bot)  # noqa
     return bot
