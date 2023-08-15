@@ -12,6 +12,9 @@ services:
       - .env
     volumes:
       - ./:/app
+    logging:
+      options:
+        max-size: "50m"
 
   db:
     image: postgres:15
