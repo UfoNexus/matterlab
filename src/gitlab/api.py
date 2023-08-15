@@ -30,10 +30,10 @@ class GitlabAPI:
         :param response: Объект класса Response, полученный после выполнения запроса (httpx._models.Response)
         :return: Словарь данных ответа
         """
-        response = response.json()
+        response_data = response.json()
         if response.status_code >= 400:
-            raise GitlabException(response)
-        return response
+            raise GitlabException(response_data)
+        return response_data
 
     def _get_url(self, endpoint: Endpoints) -> str:
         """

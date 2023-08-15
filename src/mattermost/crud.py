@@ -3,19 +3,20 @@ from typing import TYPE_CHECKING
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from . import models, schemas
+from . import models
 
 if TYPE_CHECKING:
+    from . import schemas
     from src.gitlab import models as gl_models
 
 
-async def get_or_create_user(session: Session, user: schemas.User) -> models.User:
-    result = await session.scalars(select(models.User).where(models.User.id == user.id).options(
+async def get_or_create_user(session: Session, user: 'schemas.User') -> models.User:
+    result = await session.scalars(select(models.User).where(models.User.id == user.id_).options(
         selectinload(models.User.gitlab_user)
     ))
     user_obj = result.first()
     if not user_obj:
-        user_obj = models.User(**user.model_dump(mode='json'))
+        user_obj = models.User(**user.model_dump(mode='json', by_alias=True))
         session.add(user_obj)
         await session.commit()  # noqa
         await session.refresh(user_obj)  # noqa
@@ -23,7 +24,7 @@ async def get_or_create_user(session: Session, user: schemas.User) -> models.Use
 
 
 async def get_or_create_channel(
-        session: Session, channel: schemas.Channel, gl_projects: list['gl_models.Project'] | None = None
+        session: Session, channel: 'schemas.Channel', gl_projects: list['gl_models.Project'] | None = None
 ) -> models.Channel:
     result = await session.scalars(select(models.Channel).where(models.Channel.iid == channel.iid).options(
         selectinload(models.Channel.gitlab_projects)
@@ -51,3 +52,27 @@ async def attach_gl_project_to_channel(
     await session.commit()  # noqa
     await session.refresh(channel)  # noqa
     return channel
+
+
+async def get_or_create_bot(session: Session, bot: 'schemas.CommandRequestContext') -> tuple[models.Bot, bool]:
+    result = await session.scalars(select(models.Bot).where(models.Bot.iid == bot.bot_user_id))
+    bot_obj = result.first()
+    created = False
+    if not bot_obj:
+        bot_obj = models.Bot(
+            **bot.model_dump(mode='json', include={'bot_user_id', 'bot_access_token'}, by_alias=True)
+        )
+        session.add(bot_obj)
+        await session.commit()  # noqa
+        await session.refresh(bot_obj)  # noqa
+        created = True
+    return bot_obj, created
+
+
+async def update_bot(session: Session, bot: models.Bot, data: 'schemas.CommandRequestContext') -> models.Bot:
+    for key, value in data.model_dump(mode='json', include={'bot_user_id', 'bot_access_token'}, by_alias=True):
+        setattr(bot, key, value)
+    session.add(bot)
+    await session.commit()  # noqa
+    await session.refresh(bot_obj)  # noqa
+    return bot

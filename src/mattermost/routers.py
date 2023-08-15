@@ -1,6 +1,7 @@
+import json
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, Request
 
 from src.database import AsyncSession, get_db_session
 from src.gitlab import crud as gl_crud
@@ -25,11 +26,12 @@ from .schemas import (
     TextFieldSubtype,
     TopLevelBinding,
 )
+from .services import update_bot_access_token
 
 router = APIRouter(prefix='/mattermost', tags=['Mattermost'])
 
 
-@router.get('/manifest', response_model=Manifest, response_model_exclude_none=True)
+@router.get('/manifest', response_model=Manifest, response_model_exclude_none=True, response_model_by_alias=True)
 async def manifest():
     return Manifest()
 
@@ -39,7 +41,9 @@ async def ping():
     return {'type': 'ok'}
 
 
-@router.post('/bindings', response_model=BindingResponse, response_model_exclude_none=True)
+@router.post(
+    '/bindings', response_model=BindingResponse, response_model_exclude_none=True, response_model_by_alias=True
+)
 async def bindings(request: Request):
     return BindingResponse(
         data=[
@@ -143,20 +147,24 @@ def generate_connect_gitlab_form(user: User) -> dict:
     }
 
 
-@router.post('/connect_gitlab')
+@router.post('/connect_gitlab', response_model_exclude_none=True, response_model_by_alias=True)
 async def connect_gitlab(
         data: Annotated[CommandRequest, Body()],
+        bg_tasks: BackgroundTasks,
         db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
 ):
+    bg_tasks.add_task(update_bot_access_token, data.context)
     user = await crud.get_or_create_user(db_session, data.context.acting_user)
     return generate_connect_gitlab_form(user)
 
 
-@router.post('/connect_gitlab_refresh')
+@router.post('/connect_gitlab_refresh', response_model_exclude_none=True, response_model_by_alias=True)
 async def connect_gitlab_refresh(
         data: Annotated[CommandRequest, Body()],
+        bg_tasks: BackgroundTasks,
         db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
 ):
+    bg_tasks.add_task(update_bot_access_token, data.context)
     mm_user = await crud.get_or_create_user(db_session, data.context.acting_user)
     gl_user = await gl_crud.get_or_create_gl_user_by_mm_user(db_session, mm_user, data.values)
     if data.values.get('access_token') and data.values['access_token'] != gl_user.access_token:
@@ -168,10 +176,12 @@ async def connect_gitlab_refresh(
 async def connect_gitlab_complete(
         data: Annotated[CommandRequest, Body()],
         request: Request,
+        bg_tasks: BackgroundTasks,
         db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
 ):
     from src.main import app
 
+    bg_tasks.add_task(update_bot_access_token, data.context)
     mm_user = await crud.get_or_create_user(db_session, data.context.acting_user)
     instance = GitlabAPI(mm_user.gitlab_user.access_token)
     gl_user_schema = await instance.get_current_user()
@@ -196,7 +206,7 @@ async def connect_gitlab_complete(
 #
 
 
-@router.post('/get_repos')
+@router.post('/get_repos', response_model_exclude_none=True, response_model_by_alias=True)
 async def get_repos(
         data: Annotated[CommandRequest, Body()],
         db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
@@ -211,7 +221,7 @@ async def get_repos(
         return {'type': 'error', 'text': 'Неверный персональный токен'}
     choices = [
         DynamicFieldChoice(
-            label=project.path_with_namespace, value=str(project.id), icon_data=str(project.avatar_url)
+            label=project.path_with_namespace, value=str(project.id_), icon_data=str(project.avatar_url)
         ) for project in projects
     ]
     return {'type': 'ok', 'data': {'items': choices}}

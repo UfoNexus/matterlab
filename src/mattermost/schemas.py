@@ -294,8 +294,9 @@ class User(BaseModel):
     username: str | None = Field(default=None)
     email: EmailStr | None = Field(default=None)
 
-    @classmethod
+    # noinspection PyNestedDecorators
     @model_validator(mode='before')
+    @classmethod
     def parse_email(cls, data: dict):
         if data.get('email') == '':
             data['email'] = None
@@ -312,8 +313,8 @@ class Channel(BaseModel):
 
 
 class CommandRequestContext(BaseModel):
-    bot_user_id: str
-    bot_access_token: str
+    bot_user_id: str = Field(serialization_alias='iid')
+    bot_access_token: str = Field(serialization_alias='access_token')
     acting_user: User | None = Field(default=None)
     channel: Channel | None = Field(default=None)
 

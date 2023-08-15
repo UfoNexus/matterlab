@@ -1,9 +1,15 @@
 import os
+from typing import TYPE_CHECKING
 
 from mdutils import MdUtils
 
 from src.config import settings
+from src.database import AsyncSession
 from src.gitlab.schemas import Status, WebHook
+
+from . import crud
+if TYPE_CHECKING:
+    from .schemas import CommandRequestContext
 
 color_status_match = {
     Status.success: 'brightgreen',
@@ -71,3 +77,11 @@ def get_root_url():
     if host := os.getenv('CI_ENVIRONMENT_DOMAIN'):
         return f'https://{host}/mattermost'
     return settings.mattermost_app_root_url or 'http://localhost'
+
+
+async def update_bot_access_token(data: 'CommandRequestContext') -> None:
+    async with AsyncSession() as session:
+        bot, created = await crud.get_or_create_bot(session, data)
+        if created:
+            return
+        await crud.update_bot(session, bot, data)

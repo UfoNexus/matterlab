@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 
 class User(Model):
+
     __tablename__ = 'mattermost_user'
 
     id: Mapped[str] = mapped_column(primary_key=True)
@@ -44,3 +45,11 @@ class GitlabProjectChannel(Model):
 
     gitlab_project: Mapped['Project'] = relationship(back_populates='mattermost_channel_associations')
     mattermost_channel: Mapped['Channel'] = relationship(back_populates='gitlab_project_associations')
+
+
+class Bot(Model):
+    __tablename__ = 'mattermost_bot'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    iid: Mapped[str]
+    access_token: Mapped[str]

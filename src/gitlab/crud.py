@@ -1,38 +1,36 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from src.mattermost.models import User as MMUser
+from src.mattermost import models as mm_models
 
-from .models import GitlabUser, Project
-from .schemas import GitlabUser as GitlabUserSchema
-from .schemas import ProjectAttrs as ProjectSchema
+from . import models, schemas
 
 
-async def get_or_create_project(session: Session, project_data: ProjectSchema) -> Project:
-    result = await session.scalars(select(Project).where(Project.id == project_data.id).options(
-        selectinload(Project.mattermost_channels)))
+async def get_or_create_project(session: Session, project_data: schemas.ProjectAttrs) -> models.Project:
+    result = await session.scalars(select(models.Project).where(models.Project.id == project_data.id_).options(
+        selectinload(models.Project.mattermost_channels)))
     project = result.first()
     if not project:
-        project = Project(**project_data.model_dump(mode='json'))
+        project = models.Project(**project_data.model_dump(mode='json', by_alias=True))
         session.add(project)
         await session.commit()  # noqa
         await session.refresh(project)  # noqa
     return project
 
 
-async def get_or_create_gl_user_by_mm_user(session: Session, mm_user: MMUser, data: dict) -> GitlabUser:
+async def get_or_create_gl_user_by_mm_user(session: Session, mm_user: mm_models.User, data: dict) -> models.GitlabUser:
     gl_user = mm_user.gitlab_user
     if gl_user:
-        gl_user: GitlabUser
+        gl_user: models.GitlabUser
         return gl_user
-    gl_user = GitlabUser(access_token=data['access_token'], mattermost_user=mm_user)
+    gl_user = models.GitlabUser(access_token=data['access_token'], mattermost_user=mm_user)
     session.add(gl_user)
     await session.commit()  # noqa
     await session.refresh(gl_user)  # noqa
     return gl_user
 
 
-async def update_gl_user(session: Session, user: GitlabUser, data: dict) -> GitlabUser:
+async def update_gl_user(session: Session, user: models.GitlabUser, data: dict) -> models.GitlabUser:
     for key, value in data.items():
         setattr(user, key, value)
     session.add(user)
@@ -41,10 +39,12 @@ async def update_gl_user(session: Session, user: GitlabUser, data: dict) -> Gitl
     return user
 
 
-async def update_gl_user_from_schema(session: Session, user: GitlabUser, schema: GitlabUserSchema) -> GitlabUser:
+async def update_gl_user_from_schema(
+        session: Session, user: models.GitlabUser, schema: schemas.GitlabUser
+) -> models.GitlabUser:
     is_changed = False
-    if user.iid != schema.id:
-        user.iid = schema.id
+    if user.iid != schema.id_:
+        user.iid = schema.id_
         is_changed = True
     if user.name != schema.name:
         user.name = schema.name
