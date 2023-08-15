@@ -14,8 +14,7 @@ class Settings(BaseSettings):
     gitlab_secret: str
 
     mattermost_host: HttpUrl
-    mattermost_bot_auth_token: str
-    mattermost_app_root_url: str | None = Field(default=None)
+    mattermost_app_root_url: HttpUrl | None = Field(default=None)
 
     @property
     def db_url(self) -> str:

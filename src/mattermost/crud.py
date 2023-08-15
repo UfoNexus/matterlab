@@ -54,6 +54,14 @@ async def attach_gl_project_to_channel(
     return channel
 
 
+async def get_last_bot(session: Session) -> models.Bot:
+    result = await session.scalars(select(models.Bot))
+    bot_obj = result.last()
+    if not bot_obj:
+        raise ValueError('Бот не создан')
+    return bot_obj
+
+
 async def get_or_create_bot(session: Session, bot: 'schemas.CommandRequestContext') -> tuple[models.Bot, bool]:
     result = await session.scalars(select(models.Bot).where(models.Bot.iid == bot.bot_user_id))
     bot_obj = result.first()

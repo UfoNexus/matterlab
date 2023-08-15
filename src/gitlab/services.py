@@ -1,4 +1,5 @@
 from src.database import AsyncSession
+from src.mattermost import crud as mm_crud
 from src.mattermost.api import MattermostAPI
 from src.mattermost.services import prepare_message
 
@@ -12,7 +13,8 @@ async def parse_webhook(data: WebHook):
     async with AsyncSession() as session:
         project = await crud.get_or_create_project(session, data.project)
         channels = project.mattermost_channels
+        bot = await mm_crud.get_last_bot(session)
     message = await prepare_message(data)
-    instance = MattermostAPI()
+    instance = MattermostAPI(bot.access_token)
     for channel in channels:
         await instance.create_post(channel.id, message)

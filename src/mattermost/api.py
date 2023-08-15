@@ -7,9 +7,9 @@ from src.config import settings
 
 class MattermostAPI:
 
-    def __init__(self):
+    def __init__(self, access_token: str):
         self.base_url = f'{settings.mattermost_host}api/v4'
-        self.headers = {'Authorization': f'Bearer {settings.mattermost_bot_auth_token}'}
+        self.headers = {'Authorization': f'Bearer {access_token}'}
 
     class Endpoints(enum.StrEnum):
         create_post = '/posts'
