@@ -15,7 +15,6 @@ async def parse_webhook(data: WebHook):
         channels = project.mattermost_channels
         bot = await mm_crud.get_last_bot(session)
     message = await prepare_message(data)
-    print(bot.access_token)
     instance = MattermostAPI(bot.access_token)
     for channel in channels:
         await instance.create_post(channel.id, message)
