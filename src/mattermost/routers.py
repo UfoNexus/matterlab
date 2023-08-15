@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, Request, Header
+from fastapi import APIRouter, Body, Depends, Request
 
 from src.database import AsyncSession
 from src.database import get_db_session
@@ -13,7 +13,6 @@ from .schemas import (
     Binding,
     BindingResponse,
     Call,
-    Channel,
     CommandRequest,
     DynamicFieldChoice,
     Expand,
@@ -64,6 +63,16 @@ async def bindings(request: Request):
                                     )
                                 )
                             ),
+                            Binding(
+                                label='disconnect',
+                                description='Открепить профиль GitLab',
+                                submit=Call(
+                                    path='/disconnect_gitlab',
+                                    expand=Expand(
+                                        channel=ExpandLevel.id
+                                    )
+                                )
+                            )
                         ]
                     ),
                 ]
@@ -180,6 +189,12 @@ async def connect_gitlab_complete(
     if webhook_url not in urls:
         await instance.create_webhook(project.id, webhook_url)
     return {'type': 'ok', 'text': f'Этот канал теперь будет получать хуки с проекта {project.path_with_namespace}'}
+
+
+# @router.post('/disconnect_gitlab')
+# async def disconnect_gitlab(
+#
+# )
 
 
 @router.post('/get_repos')
