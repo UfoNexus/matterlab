@@ -1,6 +1,6 @@
 import enum
 
-import requests
+import httpx
 
 from src.config import settings
 
@@ -22,6 +22,5 @@ class MattermostAPI:
             'channel_id': channel_id,
             'message': content
         }
-        response = requests.post(self._get_url(self.Endpoints.create_post), json=data, headers=self.headers)
-        print(response)
-        print(response.json())
+        async with httpx.AsyncClient() as session:
+            await session.post(self._get_url(self.Endpoints.create_post), json=data, headers=self.headers)

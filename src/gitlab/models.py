@@ -1,5 +1,4 @@
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Model
 from src.mattermost.models import Channel, GitlabProjectChannel, User

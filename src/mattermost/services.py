@@ -1,6 +1,5 @@
 import os
 
-from fastapi import Request
 from mdutils import MdUtils
 
 from src.config import settings

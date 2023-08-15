@@ -1,8 +1,10 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Body, Header
 
 from src.config import settings
+
 from .schemas import WebHook
 from .services import parse_webhook
 
@@ -21,6 +23,6 @@ async def gitlab_webhook(
     - pipeline events
     """
     if x_gitlab_token != settings.gitlab_secret:
-        print('Несанкционированный доступ')
+        logging.warning('Несанкционированный доступ')
         return
     bg_tasks.add_task(parse_webhook, data)

@@ -3,6 +3,7 @@ import enum
 import httpx
 
 from src.config import settings
+
 from . import schemas
 from .exceptions import GitlabException
 

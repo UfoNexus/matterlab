@@ -22,7 +22,7 @@ class Status(StrEnum):
 
 class ObjectAttrs(BaseModel):
     """Аттрибуты объекта оповещения"""
-    id: int = Field(title='ID')
+    id_: int = Field(title='ID', alias='id')
     iid: int = Field(title='ID внутри проекта')
     ref: str = Field(title='Название ветки')
     source: Source = Field(title='Триггер pipeline')
@@ -34,7 +34,7 @@ class ProjectAttrs(BaseModel):
     """Аттрибуты проекта/репозитория"""
     model_config = ConfigDict(from_attributes=True)
 
-    id: int = Field(title='ID')
+    id_: int = Field(title='ID', alias='id')
     name: str = Field(title='Название репы')
     web_url: HttpUrl = Field(title='Ссылка')
     path_with_namespace: str | None = Field(default=None, title='Обозначение репы')
@@ -43,7 +43,7 @@ class ProjectAttrs(BaseModel):
 
 class CommitAttrs(BaseModel):
     """Аттрибуты коммита"""
-    id: str = Field(title='sha коммита')
+    id_: str = Field(title='sha коммита', alias='id')
     title: str = Field(title='Текст коммита')
     url: HttpUrl = Field(title='Ссылка')
 
@@ -58,12 +58,13 @@ class Build(BaseModel):
 
 class GitlabUser(BaseModel):
     """Пользователь GitLab"""
-    id: int = Field(title='ID')
+    id_: int = Field(title='ID', alias='id')
     name: str = Field(title='Имя')
     username: str
     avatar_url: HttpUrl = Field(title='Аватарка')
     email: str | None
 
+    @classmethod
     @field_validator('email')
     def parse_email(cls, value, info):
         if value == '[REDACTED]':
@@ -80,6 +81,7 @@ class WebHook(BaseModel):
     project: ProjectAttrs
     commit: CommitAttrs
 
+    @classmethod
     @field_validator('object_attributes')
     def validate_pipeline_status(cls, value, info):
         if value.status == Status.success:
@@ -95,7 +97,7 @@ class WebHook(BaseModel):
         if len(failed) == 0:
             return
         return failed[0]
-    
+
     @property
     def allowed_failed_job(self) -> Build | None:
         allowed_fail = list(filter(lambda item: item.status == Status.failed and item.allow_failure, self.builds))

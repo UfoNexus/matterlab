@@ -2,11 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Request
 
-from src.database import AsyncSession
-from src.database import get_db_session
+from src.database import AsyncSession, get_db_session
 from src.gitlab import crud as gl_crud
 from src.gitlab.api import GitlabAPI
 from src.gitlab.exceptions import GitlabException
+
 from . import crud
 from .models import User
 from .schemas import (
@@ -23,7 +23,7 @@ from .schemas import (
     Location,
     Manifest,
     TextFieldSubtype,
-    TopLevelBinding
+    TopLevelBinding,
 )
 
 router = APIRouter(prefix='/mattermost', tags=['Mattermost'])
@@ -146,7 +146,7 @@ def generate_connect_gitlab_form(user: User) -> dict:
 @router.post('/connect_gitlab')
 async def connect_gitlab(
         data: Annotated[CommandRequest, Body()],
-        db_session: AsyncSession = Depends(get_db_session)
+        db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
 ):
     user = await crud.get_or_create_user(db_session, data.context.acting_user)
     return generate_connect_gitlab_form(user)
@@ -155,7 +155,7 @@ async def connect_gitlab(
 @router.post('/connect_gitlab_refresh')
 async def connect_gitlab_refresh(
         data: Annotated[CommandRequest, Body()],
-        db_session: AsyncSession = Depends(get_db_session)
+        db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
 ):
     mm_user = await crud.get_or_create_user(db_session, data.context.acting_user)
     gl_user = await gl_crud.get_or_create_gl_user_by_mm_user(db_session, mm_user, data.values)
@@ -168,7 +168,7 @@ async def connect_gitlab_refresh(
 async def connect_gitlab_complete(
         data: Annotated[CommandRequest, Body()],
         request: Request,
-        db_session: AsyncSession = Depends(get_db_session)
+        db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
 ):
     from src.main import app
 
@@ -194,13 +194,12 @@ async def connect_gitlab_complete(
 # @router.post('/disconnect_gitlab')
 # async def disconnect_gitlab(
 #
-# )
 
 
 @router.post('/get_repos')
 async def get_repos(
         data: Annotated[CommandRequest, Body()],
-        db_session: AsyncSession = Depends(get_db_session)
+        db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
 ):
     mm_user = await crud.get_or_create_user(db_session, data.context.acting_user)
     if not mm_user.gitlab_user or not mm_user.gitlab_user.access_token:

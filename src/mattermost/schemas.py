@@ -1,7 +1,6 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
-from pydantic import model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, model_validator
 
 from .services import get_root_url
 
@@ -25,9 +24,9 @@ class Location(StrEnum):
 class ExpandLevel(StrEnum):
     """Кол-во информации, включенной в метаданные вызова"""
     none = 'none'
-    all = 'all'
+    all = 'all'  # noqa: A003
     summary = 'summary'
-    id = 'id'
+    id = 'id'  # noqa: A003
 
 
 class FormFieldType(StrEnum):
@@ -35,7 +34,7 @@ class FormFieldType(StrEnum):
     text = 'text'
     static_select = 'static_select'
     dynamic_select = 'dynamic_select'
-    bool = 'bool'
+    bool = 'bool'  # noqa: A003
     user = 'user'
     channel = 'channel'
     markdown = 'markdown'
@@ -43,11 +42,11 @@ class FormFieldType(StrEnum):
 
 class TextFieldSubtype(StrEnum):
     """Тип текстового поля"""
-    input = 'input'  # A single-line text input field
+    input = 'input'  # A single-line text input field  # noqa: A003
     textarea = 'textarea'  # A multi-line text input field; uses the HTML textarea element
     email = 'email'  # A field for editing an email address
     number = 'number'  # A field for entering a number; includes a spinner component
-    password = 'password'  # A single-line text input field whose value is obscured
+    password = 'password'  # A single-line text input field whose value is obscured  # noqa: S105
     tel = 'tel'  # A field for entering a telephone number
     url = 'url'  # A field for entering a URL
 
@@ -183,7 +182,7 @@ class Select(BaseModel):
 class FormField(BaseModel):
     """Поле формы"""
     name: str = Field(title='Key to use in the values field of the call', description='Cannot include spaces or tabs')
-    type: FormFieldType = Field(title='The type of the field')
+    type_: FormFieldType = Field(title='The type of the field', alias='type')
     is_required: bool = Field(default=False, title='Whether the field has a mandatory value')
     readonly: bool = Field(default=False, title='Whether a field’s value is read-only')
     value: str | int | bool | None = Field(default=None, title='The field’s default value')
@@ -283,7 +282,7 @@ class TopLevelBinding(BaseModel):
 
 
 class BindingResponse(BaseModel):
-    type: str = 'ok'
+    type: str = 'ok'  # noqa: A003
     data: list[TopLevelBinding]
 
 
@@ -291,10 +290,11 @@ class User(BaseModel):
     """Пользователь Mattermost"""
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id_: str = Field(alias='id')
     username: str | None = Field(default=None)
     email: EmailStr | None = Field(default=None)
 
+    @classmethod
     @model_validator(mode='before')
     def parse_email(cls, data: dict):
         if data.get('email') == '':

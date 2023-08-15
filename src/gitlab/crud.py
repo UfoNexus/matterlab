@@ -1,11 +1,11 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import Session, selectinload
 
 from src.mattermost.models import User as MMUser
 
 from .models import GitlabUser, Project
-from .schemas import GitlabUser as GitlabUserSchema, ProjectAttrs as ProjectSchema
+from .schemas import GitlabUser as GitlabUserSchema
+from .schemas import ProjectAttrs as ProjectSchema
 
 
 async def get_or_create_project(session: Session, project_data: ProjectSchema) -> Project:
