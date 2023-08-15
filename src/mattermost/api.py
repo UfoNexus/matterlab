@@ -1,4 +1,5 @@
 import enum
+import logging
 
 import httpx
 
@@ -22,8 +23,7 @@ class MattermostAPI:
             'channel_id': channel_id,
             'message': content
         }
-        print(data)
         async with httpx.AsyncClient() as session:
             response = await session.post(self._get_url(self.Endpoints.create_post), json=data, headers=self.headers)
         if response.status_code >= 400:
-            print(response.json())
+            logging.error(response.json())

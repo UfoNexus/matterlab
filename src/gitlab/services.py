@@ -17,4 +17,4 @@ async def parse_webhook(data: WebHook):
     message = await prepare_message(data)
     instance = MattermostAPI(bot.access_token)
     for channel in channels:
-        await instance.create_post(channel.id, message)
+        await instance.create_post(channel.iid, message)
