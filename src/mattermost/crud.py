@@ -66,7 +66,7 @@ async def delete_gl_project_from_channel(
 
 async def get_last_bot(session: Session) -> models.Bot:
     result = await session.scalars(select(models.Bot))
-    bot_obj = result.last()
+    bot_obj = result.first()
     if not bot_obj:
         raise ValueError('Бот не создан')
     return bot_obj
