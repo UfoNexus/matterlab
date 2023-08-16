@@ -71,7 +71,7 @@ async def prepare_message(data: WebHook) -> str:
     md_file.new_line()
     md_file.new_table(columns=columns, rows=round(len(table_data) / columns), text=table_data, text_align='left')
 
-    md_file.file_data_text = md_file.file_data_text.strip(' \n')
+    md_file.file_data_text = md_file.file_data_text.lstrip(' \n')
     return md_file.file_data_text
 
 
