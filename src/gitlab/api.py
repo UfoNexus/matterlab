@@ -63,7 +63,7 @@ class GitlabAPI:
         per_page = 100
         result = response = []
         is_first = True
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10) as client:
             while is_first or len(response) == per_page:
                 is_first = False
                 params = {
