@@ -54,7 +54,7 @@ class GitlabAPI:
         response = self._parse_response(response)
         return schemas.GitlabUser(**response)
 
-    async def get_projects(self) -> list[schemas.ProjectAttrs]:
+    async def get_projects(self, search: str | None = None) -> list[schemas.ProjectAttrs]:
         """
         Получение списка активных проектов, в которых пользователь является участником
         :return: список объектов схемы ProjectAttrs (src.gitlab.schemas.ProjectAttrs)
@@ -75,6 +75,8 @@ class GitlabAPI:
                     'per_page': per_page,
                     'page': page
                 }
+                if search:
+                    params['search'] = search
                 response = await client.get(
                     self._get_url(self.Endpoints.list_projects),
                     headers=self.headers,

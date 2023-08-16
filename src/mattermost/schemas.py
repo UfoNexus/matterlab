@@ -326,6 +326,7 @@ class CommandRequest(BaseModel):
     raw_command: str | None = Field(default=None)
     context: CommandRequestContext | None = Field(default=None)
     values: dict | None = Field(default=None)
+    query: str | None = Field(default=None)
 
 
 class DynamicFieldChoice(BaseModel):

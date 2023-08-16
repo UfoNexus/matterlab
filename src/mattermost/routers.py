@@ -259,7 +259,7 @@ async def get_repos(
         return {'type': 'error', 'text': 'Нужно сначала указать персональный токен'}
     instance = GitlabAPI(mm_user.gitlab_user.access_token)
     try:
-        projects = await instance.get_projects()
+        projects = await instance.get_projects(data.query)
     except GitlabException:
         return {'type': 'error', 'text': 'Неверный персональный токен'}
     choices = [
