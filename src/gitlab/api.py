@@ -70,7 +70,7 @@ class GitlabAPI:
                     'archived': False,
                     'membership': True,
                     'simple': True,
-                    'order_by': 'name',
+                    'order_by': 'path',
                     'sort': 'asc',
                     'per_page': per_page,
                     'page': page
