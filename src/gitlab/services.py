@@ -12,12 +12,8 @@ async def parse_webhook(data: WebHook):
         return
     async with AsyncSession() as session:
         project = await crud.get_or_create_project(session, data.project)
-        print(project)
         channels = project.mattermost_channels
-        print(channels)
         bot = await mm_crud.get_last_bot(session)
-        print(bot)
-        print(bot.access_token)
     message = await prepare_message(data)
     instance = MattermostAPI(bot.access_token)
     for channel in channels:

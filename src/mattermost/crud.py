@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session, selectinload
 from . import models
 
 if TYPE_CHECKING:
-    from . import schemas
     from src.gitlab import models as gl_models
+
+    from . import schemas
 
 
 async def get_or_create_user(session: Session, user: 'schemas.User') -> models.User:
