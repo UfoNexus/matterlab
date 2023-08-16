@@ -27,7 +27,7 @@ async def prepare_message(data: WebHook) -> str:
         f'https://img.shields.io/badge/build-{data.object_attributes.status}-'
         f'{color_status_match[data.object_attributes.status]}?logo=gitlab'
     )
-    repo_badge_url = f'https://img.shields.io/badge/repository-{data.project.name.replace("-", "_")}-white'
+    repo_badge_url = f'https://img.shields.io/badge/repository-{data.project.name.replace("-", "--")}-white'
     md_file.new_line(
         md_file.new_inline_image("gitlab build badge", badge_url) +
         md_file.new_inline_link(str(data.project.web_url), md_file.new_inline_image('gitlab repo badge', repo_badge_url))
