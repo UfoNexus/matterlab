@@ -70,7 +70,6 @@ async def prepare_message(data: WebHook) -> str:
     columns = 2
     md_file.new_line()
     md_file.new_table(columns=columns, rows=round(len(table_data) / columns), text=table_data, text_align='left')
-    md_file.file_data_text = md_file.file_data_text.strip()  # Библиотека после таблицы добавляет лишний linebreak
 
     return md_file.file_data_text
 
