@@ -115,7 +115,7 @@ def generate_connect_gitlab_form(user: User) -> dict:
                     name='repo',
                     type=FormFieldType.dynamic_select,
                     is_required=True,
-                    description='Выбор репозитория',
+                    description='Выбор репозитория. Для поиска введите не менее 3 символов',
                     label='Репозиторий',
                     position=2,
                     lookup=Call(
