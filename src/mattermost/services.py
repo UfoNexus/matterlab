@@ -22,12 +22,16 @@ color_status_match = {
 async def prepare_message(data: WebHook) -> str:
     md_file = MdUtils(file_name='mattermost_message')
 
-    # Значок со статусом pipeline
+    # Значки со статусом pipeline и ссылкой на репу
     badge_url = (
         f'https://img.shields.io/badge/build-{data.object_attributes.status}-'
         f'{color_status_match[data.object_attributes.status]}?logo=gitlab'
     )
-    md_file.new_line(md_file.new_inline_image("gitlab build badge", badge_url))
+    repo_badge_url = f'https://img.shields.io/badge/repository-{data.project.name}-white'
+    md_file.new_line(
+        md_file.new_inline_image("gitlab build badge", badge_url) +
+        md_file.new_inline_link(str(data.project.web_url), md_file.new_inline_image('gitlab repo badge', repo_badge_url))
+    )
 
     # Информация о пользователе, запустившего сборку
     md_file.new_line(
@@ -68,8 +72,6 @@ async def prepare_message(data: WebHook) -> str:
     md_file.new_table(columns=columns, rows=round(len(table_data) / columns), text=table_data, text_align='left')
     md_file.file_data_text = md_file.file_data_text.strip()  # Библиотека после таблицы добавляет лишний linebreak
 
-    # Ссылка на репозиторий
-    md_file.new_line(f'> *{md_file.new_inline_link(str(data.project.web_url), data.project.name)}*')
     md_file.file_data_text = md_file.file_data_text.strip(' \n')
     return md_file.file_data_text
 
