@@ -195,6 +195,8 @@ async def connect_gitlab_complete(
     webhook_url = base_url + app.url_path_for('gitlab_webhook')
     hooks = await instance.get_webhooks(project.id)
     urls = [item.url for item in hooks]
+    print(webhook_url)
+    print(urls)
     if webhook_url not in urls:
         await instance.create_webhook(project.id, webhook_url)
     return {'type': 'ok', 'text': f'Этот канал теперь будет получать хуки с проекта {project.path_with_namespace}'}
