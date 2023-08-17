@@ -30,7 +30,9 @@ async def prepare_message(data: WebHook) -> str:
     repo_badge_url = f'https://img.shields.io/badge/repository-{data.project.name.replace("-", "--")}-white'
     md_file.new_line(
         md_file.new_inline_image("gitlab build badge", badge_url) +
-        md_file.new_inline_link(str(data.project.web_url), md_file.new_inline_image('gitlab repo badge', repo_badge_url))
+        md_file.new_inline_link(
+            str(data.project.web_url), md_file.new_inline_image('gitlab repo badge', repo_badge_url)
+        )
     )
 
     # Информация о пользователе, запустившего сборку

@@ -14,10 +14,11 @@ class Project(Model):
     avatar_url: Mapped[str | None] = mapped_column(nullable=True)
 
     mattermost_channels: Mapped[list['Channel']] = relationship(
-        back_populates='gitlab_projects', secondary='gitlab_project_mattermost_channel'
+        back_populates='gitlab_projects', secondary='gitlab_project_mattermost_channel',
+        overlaps='gitlab_project_associations,mattermost_channel,gitlab_project'
     )
     mattermost_channel_associations: Mapped[list['GitlabProjectChannel']] = relationship(
-        back_populates='gitlab_project'
+        back_populates='gitlab_project', overlaps='gitlab_projects,mattermost_channels'
     )
 
 

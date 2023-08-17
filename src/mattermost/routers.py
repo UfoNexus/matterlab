@@ -22,6 +22,8 @@ from .schemas import (
     FormFieldType,
     Location,
     Manifest,
+    ReminderPeriod,
+    Select,
     TextFieldSubtype,
     TopLevelBinding,
 )
@@ -38,6 +40,61 @@ async def manifest():
 @router.post('/ping')
 async def ping():
     return {'type': 'ok'}
+
+
+def generate_reminder_form():
+    return Form(
+        title='Напомнить о сообщении',
+        submit=Call(
+            path='/create_reminder',
+            expand=Expand(
+                acting_user=ExpandLevel.summary,
+                channel=ExpandLevel.summary,
+                post=ExpandLevel.summary
+            )
+        ),
+        fields=[
+            FormField(
+                name='interval',
+                type=FormFieldType.static_select,
+                is_required=True,
+                label='Когда_напомнить?',
+                position=1,
+                multiselect=False,
+                refresh=True,
+                options=[
+                    Select(
+                        label='Через 15 минут',
+                        value=ReminderPeriod.min_15
+                    ),
+                    Select(
+                        label='Через 30 минут',
+                        value=ReminderPeriod.min_30
+                    ),
+                    Select(
+                        label='Через час',
+                        value=ReminderPeriod.hour_1
+                    ),
+                    Select(
+                        label='Через 2 часа',
+                        value=ReminderPeriod.hour_2
+                    ),
+                    Select(
+                        label='Через 4 часа',
+                        value=ReminderPeriod.hour_4
+                    ),
+                    Select(
+                        label='Указать дату и время',
+                        value=ReminderPeriod.spec_datetime
+                    ),
+
+                ]
+            )
+        ],
+        source=Call(
+            path='/create_reminder_refresh'
+        )
+    )
 
 
 @router.post(
@@ -85,16 +142,9 @@ async def bindings(request: Request):
                 bindings=[
                     Binding(
                         location='send-button',
-                        label='Remind',
-                        icon=f'{str(request.base_url)}static/creonit.png',
-                        submit=Call(
-                            path='/create_reminder',
-                            expand=Expand(
-                                acting_user=ExpandLevel.summary,
-                                channel=ExpandLevel.summary,
-                                post=ExpandLevel.summary
-                            )
-                        )
+                        label='Напомнить мне',
+                        icon=f'{str(request.base_url)}static/reminder.svg',
+                        form=generate_reminder_form()
                     )
                 ]
             )
@@ -303,5 +353,37 @@ async def get_channel_repos(
 
 
 @router.post('/create_reminder')
-async def create_reminder():
-    return {'type': 'ok', 'text': 'YES!'}
+async def create_reminder(
+        data: Annotated[CommandRequest, Body()],
+        db_session: AsyncSession = Depends(get_db_session)  # noqa: B008
+):
+    return {
+        'type': 'ok',
+        'text': 'Успех'
+    }
+
+
+@router.post('/create_reminder_refresh')
+async def create_reminder_refresh(
+        data: Annotated[CommandRequest, Body()]
+):
+    form = generate_reminder_form()
+    if data.values and data.values.get('interval', {}):
+        form.fields[0].value = Select(
+            label=data.values['interval']['label'],
+            value=data.values['interval']['value']
+        )
+        if data.values['interval']['value'] == ReminderPeriod.spec_datetime:
+            form.fields.append(
+                FormField(
+                    name='datetime',
+                    type=FormFieldType.text,
+                    is_required=True,
+                    label='Введите_дату_и_время',
+                    description='Формат: "01.01.1970 09:00" (учитывается ваш текущий часовой пояс)'
+                )
+            )
+    return {
+        'type': 'form',
+        'form': form
+    }

@@ -30,10 +30,11 @@ class Channel(Model):
     display_name: Mapped[str | None] = mapped_column(nullable=True)
 
     gitlab_projects: Mapped[list['Project']] = relationship(
-        back_populates='mattermost_channels', secondary='gitlab_project_mattermost_channel'
+        back_populates='mattermost_channels', secondary='gitlab_project_mattermost_channel',
+        overlaps='gitlab_projects'
     )
     gitlab_project_associations: Mapped[list['GitlabProjectChannel']] = relationship(
-        back_populates='mattermost_channel'
+        back_populates='mattermost_channel', overlaps='gitlab_projects'
     )
 
 
@@ -43,8 +44,12 @@ class GitlabProjectChannel(Model):
     gitlab_project_id: Mapped[int] = mapped_column(ForeignKey('gitlab_project.id'), primary_key=True)
     mattermost_channel_id: Mapped[int] = mapped_column(ForeignKey('mattermost_channel.id'), primary_key=True)
 
-    gitlab_project: Mapped['Project'] = relationship(back_populates='mattermost_channel_associations')
-    mattermost_channel: Mapped['Channel'] = relationship(back_populates='gitlab_project_associations')
+    gitlab_project: Mapped['Project'] = relationship(
+        back_populates='mattermost_channel_associations', overlaps='gitlab_projects'
+    )
+    mattermost_channel: Mapped['Channel'] = relationship(
+        back_populates='gitlab_project_associations', overlaps='gitlab_projects'
+    )
 
 
 class Bot(Model):

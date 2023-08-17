@@ -1,5 +1,3 @@
-import os
-
 from debug_toolbar.middleware import DebugToolbarMiddleware
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -10,7 +8,7 @@ from src.mattermost.routers import router as mattermost_router
 from .config import settings
 
 app = FastAPI(
-    debug=os.getenv('DEBUG', False),
+    debug=settings.debug,
     title='Matterlab',
     version='0.0.1',
     docs_url='/openapi'

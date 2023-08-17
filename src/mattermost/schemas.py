@@ -1,8 +1,18 @@
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, model_validator
 
 from .services import get_root_url
+
+
+class ReminderPeriod(StrEnum):
+    min_15 = '15_mins'
+    min_30 = '30_mins'
+    hour_1 = '1_hour'
+    hour_2 = '2_hours'
+    hour_4 = '4_hours'
+    spec_datetime = 'specific_datetime'
 
 
 class Permission(StrEnum):
@@ -185,7 +195,7 @@ class FormField(BaseModel):
     type_: FormFieldType = Field(title='The type of the field', alias='type')
     is_required: bool = Field(default=False, title='Whether the field has a mandatory value')
     readonly: bool = Field(default=False, title='Whether a field’s value is read-only')
-    value: str | int | bool | None = Field(default=None, title='The field’s default value')
+    value: Any = Field(default=None, title='The field’s default value')
     description: str | None = Field(
         default=None,
         title='Short description of the field, displayed beneath the field in modal dialogs'
