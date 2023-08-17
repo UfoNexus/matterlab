@@ -121,7 +121,7 @@ class Manifest(BaseModel):
                     'Used as the bot account icon and in the product Marketplace.'
     )
     requested_permissions: list[Permission] | None = Field(
-        default=[Permission.act_as_bot, Permission.act_as_user],
+        default=[Permission.act_as_bot, Permission.act_as_user, Permission.remote_oauth2],
         title='List of permissions needed by the App'
     )
     requested_locations: list[Location] | None = Field(
