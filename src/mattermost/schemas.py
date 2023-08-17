@@ -125,7 +125,7 @@ class Manifest(BaseModel):
         title='List of permissions needed by the App'
     )
     requested_locations: list[Location] | None = Field(
-        default=[Location.channel_header, Location.command],
+        default=[Location.channel_header, Location.command, Location.post_menu, Location.in_post],
         title='The list of top-level locations that the App intends to bind to'
     )
     bindings: Call | None = Field(

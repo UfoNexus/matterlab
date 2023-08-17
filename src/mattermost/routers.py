@@ -80,6 +80,24 @@ async def bindings(request: Request):
                     ),
                 ]
             ),
+            TopLevelBinding(
+                location=Location.post_menu,
+                bindings=[
+                    Binding(
+                        location='send-button',
+                        label='Remind',
+                        icon=f'{str(request.base_url)}static/creonit.png',
+                        submit=Call(
+                            path='/create_reminder',
+                            expand=Expand(
+                                acting_user=ExpandLevel.summary,
+                                channel=ExpandLevel.summary,
+                                post=ExpandLevel.summary
+                            )
+                        )
+                    )
+                ]
+            )
         ]
     )
 
@@ -282,3 +300,8 @@ async def get_channel_repos(
         ) for repo in channel.gitlab_projects
     ]
     return {'type': 'ok', 'data': {'items': choices}}
+
+
+@router.post('/create_reminder')
+async def create_reminder():
+    return {'type': 'ok', 'text': 'YES!'}
