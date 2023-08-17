@@ -19,5 +19,15 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    volumes:
+      - redis-data:/data
+
+  worker:
+    build:
+      context: .
+      target: dev
+
 volumes:
   db-data:
+  redis-data:
