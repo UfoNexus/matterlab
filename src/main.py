@@ -17,6 +17,7 @@ app = FastAPI(
 )
 app.openapi_version = '3.0.3'
 app.mount('/static', StaticFiles(directory='static'), name='static')
+app.mount('/mattermost/static', StaticFiles(directory='static'), name='mm_static')
 
 if settings.local:
     app.add_middleware(

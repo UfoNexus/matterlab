@@ -32,7 +32,7 @@ router = APIRouter(prefix='/mattermost', tags=['Mattermost'])
 
 @router.get('/manifest', response_model=Manifest, response_model_exclude_none=True, response_model_by_alias=True)
 async def manifest():
-    return Manifest()
+    return Manifest(icon='creonit.png')
 
 
 @router.post('/ping')
