@@ -56,6 +56,7 @@ class Build(BaseModel):
     allow_failure: bool = Field(default=False, title='Ошибки не вызывают отмену сборки')
 
 
+# noinspection PyNestedDecorators
 class GitlabUser(BaseModel):
     """Пользователь GitLab"""
     id_: int = Field(title='ID', alias='id')
@@ -64,14 +65,15 @@ class GitlabUser(BaseModel):
     avatar_url: HttpUrl = Field(title='Аватарка')
     email: str | None
 
-    @classmethod
     @field_validator('email')
+    @classmethod
     def parse_email(cls, value, info):
         if value == '[REDACTED]':
             value = None
         return value
 
 
+# noinspection PyNestedDecorators
 class WebHook(BaseModel):
     """Объект оповещения"""
     object_kind: str = Field(title='Тип оповещения', examples=['pipeline'])
@@ -81,8 +83,8 @@ class WebHook(BaseModel):
     project: ProjectAttrs
     commit: CommitAttrs
 
-    @classmethod
     @field_validator('object_attributes')
+    @classmethod
     def validate_pipeline_status(cls, value, info):
         if value.status == Status.success:
             for build in info.data['builds']:

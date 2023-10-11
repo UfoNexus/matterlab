@@ -62,7 +62,7 @@ async def prepare_message(data: WebHook) -> str:
     )
     table_data.extend([branch, commit])
 
-    # Опциональные данные о провале сборке или с допущенными ошибками
+    # Опциональные данные о провале сборки или с допущенными ошибками
     failed_job = data.failed_job or data.allowed_failed_job
     if data.object_attributes.status in [Status.failed, Status.warning] and failed_job:
         stage = f'**Ошибка в стейдже: **{failed_job.stage}&emsp;&emsp;&emsp;'
