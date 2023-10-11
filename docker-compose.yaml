@@ -23,12 +23,12 @@ services:
   db:
     image: postgres:15.4
 
-  redis:
-    image: redis:7.2
-    command: redis-server --appendonly yes
-
-  worker:
-    <<: *app
-    depends_on:
-      - app
-    command: rq worker --with-scheduler -c src.config.redis
+#  redis:
+#    image: redis:7.2
+#    command: redis-server --appendonly yes
+#
+#  worker:
+#    <<: *app
+#    depends_on:
+#      - app
+#    command: rq worker --with-scheduler -c src.config.redis
