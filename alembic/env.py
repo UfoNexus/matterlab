@@ -6,8 +6,7 @@ from alembic import context
 from sqlalchemy.orm.decl_api import DeclarativeAttributeIntercept
 
 from src.config import settings
-from src.database import Model
-from src.database import engine
+from src.database import Model, engine
 
 # Import all objects from every models.py inside src package
 modules = list(filter(lambda item: item.ispkg is True, pkgutil.iter_modules(['src'])))
@@ -17,7 +16,7 @@ for module in modules:
     except ModuleNotFoundError:
         continue
     else:
-        names = dict()
+        names = {}
         for key, value in mdl.__dict__.items():
             if not key.startswith('_') and type(value) == DeclarativeAttributeIntercept:
                 names[key] = value
